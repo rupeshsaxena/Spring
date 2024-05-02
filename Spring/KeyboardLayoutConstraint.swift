@@ -56,6 +56,14 @@ public class KeyboardLayoutConstraint: NSLayoutConstraint {
             switch (userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber, userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber) {
             case let (.some(duration), .some(curve)):
                 
+                    let keyWindow = UIApplication
+                        .shared
+                        .connectedScenes
+                        .filter({ $0.activationState == .foregroundActive })
+                        .compactMap { ($0 as? UIWindowScene) }
+                        .first?.windows
+                        .filter({ $0.isKeyWindow }).first
+                    
                 let options = UIView.AnimationOptions(rawValue: curve.uintValue)
                 
                 UIView.animate(
@@ -63,7 +71,7 @@ public class KeyboardLayoutConstraint: NSLayoutConstraint {
                     delay: 0,
                     options: options,
                     animations: {
-                        UIApplication.shared.keyWindow?.layoutIfNeeded()
+                        keyWindow?.layoutIfNeeded()
                         return
                     }, completion: { finished in
                 })
@@ -92,7 +100,12 @@ public class KeyboardLayoutConstraint: NSLayoutConstraint {
                     delay: 0,
                     options: options,
                     animations: {
-                        UIApplication.shared.keyWindow?.layoutIfNeeded()
+                        UIApplication
+                            .shared
+                            .connectedScenes
+                            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+                            .last!
+                            .layoutIfNeeded()
                         return
                     }, completion: { finished in
                 })
